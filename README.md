@@ -1,195 +1,201 @@
+# 🚀 Backend Engineering Assignment  
+## Core API & Guardrails System
 
-# Backend Engineering Assignment - Core API & Guardrails
+A Spring Boot backend microservice built to handle high-volume interactions using **PostgreSQL**, **Redis**, and **thread-safe guardrails**.
 
-## Project Overview
+This project demonstrates backend fundamentals including:
 
-This project is a Spring Boot backend microservice developed for the Backend Engineering Assignment.
-
-It acts as a central API system with Redis-powered guardrails, PostgreSQL persistence, and scheduled notification batching.
-
-The application is designed to safely handle concurrent bot interactions using Redis atomic operations while keeping the service stateless.
-
----
-__________________________________________________________________________________________________________________________________________________________________
-## Tech Stack
-
-- Java 17
-- Spring Boot 3.x
-- Spring Data JPA
-- PostgreSQL
-- Redis (tested locally using Memurai on Windows)
-- Maven
-- Spring Tool Suite (STS)
-- Postman
-
----
-__________________________________________________________________________________________________________________________________________________________________
-## Postman Collection
-
-The exported Postman collection is included in the repository.
-
-File:
-
-Backend-Assignment-Postman-Collection.json
-
-How to use:
-
-1. Open Postman
-2. Click Import
-3. Select the JSON file
-4. Run the saved requests
-
-Included requests:
-
-- Create Post
-- Get Post
-- Like Post
-- Add Human Comment
-- Add Bot Comment
-- Get Virality Score
-- Cooldown Test
-- Depth Limit Test
-
-__________________________________________________________________________________________________________________________________________________________________
-## Features Implemented
-
-# Phase 1 - Core API & Database Setup
-
-Entities created:
-
-- User
-- Bot
-- Post
-- Comment
-
-REST APIs:
-
-- `POST /api/posts` → Create new post
-- `POST /api/posts/{postId}/comments` → Add comment
-- `POST /api/posts/{postId}/like` → Like post
-- `GET /api/posts/{postId}` → Get post details
-- `GET /api/redis/virality/{postId}` → Check virality score
+- REST API development  
+- Redis atomic counters & locks  
+- Rate limiting / cooldown logic  
+- Scheduled batch notifications  
+- Stateless architecture  
+- Production-style backend structure  
 
 ---
 
-# Phase 2 - Redis Virality Engine & Atomic Locks
+# 📌 Tech Stack
 
-## Real-Time Virality Score
+| Layer | Technology |
+|------|------------|
+| Language | Java 17 |
+| Framework | Spring Boot 3.x |
+| ORM | Spring Data JPA / Hibernate |
+| Database | PostgreSQL |
+| Distributed State | Redis |
+| Build Tool | Maven |
+| Testing Tool | Postman |
+| IDE | Spring Tool Suite (STS) |
 
-Stored in Redis using key:
+---
 
-```text id="i8p6mt"
+# 📂 Project Structure
+
+```text
+src/main/java/com/assignment/
+
+├── controller
+├── service
+├── repository
+├── entity
+├── dto
+├── config
+├── scheduler
+└── exception
+✅ Features Implemented
+🔹 Phase 1 — Core API & Database
+Entities
+User
+Bot
+Post
+Comment
+REST APIs
+Method	Endpoint	Description
+POST	/api/posts	Create new post
+GET	/api/posts/{id}	Fetch post
+POST	/api/posts/{id}/comments	Add comment
+POST	/api/posts/{id}/like	Like post
+🔹 Phase 2 — Redis Virality Engine
+
+Real-time virality score stored in Redis.
+
+Redis Key
 post:{id}:virality_score
+Scoring Rules
+Action	Score
+Bot Reply	+1
+Human Like	+20
+Human Comment	+50
+🔹 Phase 2 — Atomic Guardrails
+1️⃣ Horizontal Cap
 
-Scoring Rules:
-
-Bot Reply = +1
-Human Like = +20
-Human Comment = +50
-Guardrails
-Horizontal Cap
+Maximum 100 bot replies per post.
 
 Redis Key:
 
 post:{id}:bot_count
-Maximum 100 bot replies allowed per post
-Additional requests return HTTP 429 Too Many Requests
-Vertical Cap
-Comment thread depth cannot exceed 20
-Cooldown Cap
+100th request allowed
+101st request blocked with HTTP 429
+2️⃣ Vertical Cap
+
+Maximum thread depth:
+
+20
+
+If exceeded:
+
+HTTP 400 Bad Request
+3️⃣ Cooldown Cap
+
+Same bot cannot interact with same human more than once in 10 minutes.
 
 Redis Key:
 
 cooldown:bot_{botId}:human_{userId}
-Same bot cannot interact with same human more than once in 10 minutes
-Phase 3 - Notification Engine
-Smart Notification Throttling
 
-When a bot interacts with a user's post:
+Blocked requests return:
 
-If notification sent within last 15 minutes:
+HTTP 429 Too Many Requests
+🔹 Phase 3 — Notification Engine
 
-Store notification in Redis List:
+To prevent spam notifications:
+
+If user received notification in last 15 minutes:
+
+Store pending notifications in Redis List:
 
 user:{id}:pending_notifs
 Else:
 
-Immediate notification logged to console.
+Immediate push notification logged to console.
 
-Scheduler
+⏰ Scheduler
 
 Runs every 5 minutes using Spring Scheduler.
 
-Tasks performed:
-
+Tasks:
 Scan pending notifications
-Summarize interactions
-Clear pending queue
+Summarize bot interactions
+Clear notification queue
+Example Output
+Summarized Push Notification:
+Bot 3 replied to your post and 2 others interacted with your posts.
+🔐 Concurrency & Thread Safety
 
-Example:
-
-Summarized Push Notification: Bot 3 replied to your post and 2 others interacted with your posts.
-Thread Safety / Concurrency Handling
-
-Redis atomic operations were used:
+Redis atomic commands used:
 
 INCR
 SETNX
-TTL Expiration
+TTL Expiry
+Ensures:
 
-These ensure:
+✅ Accurate counters under concurrent traffic
+✅ Safe cooldown locks
+✅ Race-condition resistant bot caps
 
-Accurate bot counters under concurrent requests
-Safe cooldown enforcement
-Stateless distributed counters
-Stateless Architecture
+🌐 Stateless Architecture
 
-No runtime counters or state stored in Java memory.
+No runtime counters stored in Java memory.
 
 Not used:
 
 HashMap
-static variables
-in-memory counters
+static counters
+local in-memory locks
 
-All temporary state is stored in Redis.
+All temporary state handled in Redis.
 
-Project Structure
-src/main/java/com/assignment/
+⚠️ Error Handling
 
-controller/
-service/
-repository/
-entity/
-dto/
-config/
-scheduler/
-exception/
-How to Run Locally
+Custom exception handling implemented using:
+
+ApiException
+GlobalExceptionHandler
+Status Codes
+Status	Meaning
+400	Invalid depth level
+404	Post not found
+429	Rate limited / Bot cap exceeded
+🧪 Postman Collection
+
+Included in project root:
+
+Backend-Assignment-Postman-Collection.json
+Contains Tested Requests
+Create Post
+Get Post
+Like Post
+Human Comment
+Bot Comment
+Virality Check
+Cooldown Test
+Depth Limit Test
+⚙️ How to Run Locally
 Prerequisites
 Java 17
 PostgreSQL
 Redis
 Create Database
 CREATE DATABASE assignment_db;
-__________________________________________________________________________________________________________________________________________________________________
 Configure application.properties
-
 spring.datasource.url=jdbc:postgresql://localhost:5432/assignment_db
 spring.datasource.username=postgres
 spring.datasource.password=your_password
-
 
 spring.data.redis.host=localhost
 spring.data.redis.port=6379
 Run Application
 mvn spring-boot:run
 
-or run from STS.
-__________________________________________________________________________________________________________________________________________________________________
-Docker Compose
+or run directly from STS.
 
-A docker-compose.yml file is included to quickly start:
+🐳 Docker Support
+
+Included:
+
+docker-compose.yml
+
+Starts:
 
 PostgreSQL
 Redis
@@ -197,34 +203,23 @@ Redis
 Run:
 
 docker compose up -d
-Sample API Requests
-Create Post
+📦 Deliverables Included
 
-POST /api/posts
+✅ Spring Boot Source Code
+✅ PostgreSQL + Redis Integration
+✅ docker-compose.yml
+✅ Postman Collection
+✅ README.md
 
-{
-  "authorId": 1,
-  "authorType": "USER",
-  "content": "My first post"
-}
-Add Bot Comment
+📝 Notes
 
-POST /api/posts/1/comments
+This project was developed and tested locally on Windows using:
 
-{
-  "authorId": 2,
-  "authorType": "BOT",
-  "content": "Nice post",
-  "depthLevel": 1
-}
-Deliverables Included
-Spring Boot source code
-PostgreSQL + Redis configuration
-docker-compose.yml
-Postman Collection JSON
-README.md
-Notes
+PostgreSQL
+Memurai (Redis-compatible server)
 
-This project was developed and tested locally on Windows using PostgreSQL and Memurai (Redis-compatible server).
+Docker Compose is included for reviewer convenience.
 
-Docker Compose is included for easier reviewer setup.
+👩‍💻 Author
+
+Bhavitha Pala
