@@ -10,7 +10,7 @@ It acts as a central API system with Redis-powered guardrails, PostgreSQL persis
 The application is designed to safely handle concurrent bot interactions using Redis atomic operations while keeping the service stateless.
 
 ---
-
+__________________________________________________________________________________________________________________________________________________________________
 ## Tech Stack
 
 - Java 17
@@ -23,7 +23,34 @@ The application is designed to safely handle concurrent bot interactions using R
 - Postman
 
 ---
+__________________________________________________________________________________________________________________________________________________________________
+## Postman Collection
 
+The exported Postman collection is included in the repository.
+
+File:
+
+Backend-Assignment-Postman-Collection.json
+
+How to use:
+
+1. Open Postman
+2. Click Import
+3. Select the JSON file
+4. Run the saved requests
+
+Included requests:
+
+- Create Post
+- Get Post
+- Like Post
+- Add Human Comment
+- Add Bot Comment
+- Get Virality Score
+- Cooldown Test
+- Depth Limit Test
+
+__________________________________________________________________________________________________________________________________________________________________
 ## Features Implemented
 
 # Phase 1 - Core API & Database Setup
@@ -145,7 +172,7 @@ PostgreSQL
 Redis
 Create Database
 CREATE DATABASE assignment_db;
-
+__________________________________________________________________________________________________________________________________________________________________
 Configure application.properties
 
 spring.datasource.url=jdbc:postgresql://localhost:5432/assignment_db
@@ -159,7 +186,7 @@ Run Application
 mvn spring-boot:run
 
 or run from STS.
-
+__________________________________________________________________________________________________________________________________________________________________
 Docker Compose
 
 A docker-compose.yml file is included to quickly start:
