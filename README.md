@@ -145,10 +145,13 @@ PostgreSQL
 Redis
 Create Database
 CREATE DATABASE assignment_db;
+
 Configure application.properties
+
 spring.datasource.url=jdbc:postgresql://localhost:5432/assignment_db
 spring.datasource.username=postgres
-spring.datasource.password=postgres
+spring.datasource.password=your_password
+
 
 spring.data.redis.host=localhost
 spring.data.redis.port=6379
